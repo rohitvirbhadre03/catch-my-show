@@ -1,0 +1,13 @@
+pluginManagement {
+    plugins {
+        id 'org.jetbrains.kotlin.jvm' version '2.1.21'
+    }
+}
+rootProject.name = 'catch-my-show'
+
+include("services:shared")
+include("services:partner-inventory-service")
+include("services:booking-service")
+include("services:payment-service")
+include("services:notification-service")
+include("services:ai-recommendation-service")

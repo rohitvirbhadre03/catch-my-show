@@ -1,0 +1,92 @@
+// ==== Enums ====
+enum PartnerStatus { PENDING, ACTIVE, SUSPENDED }
+enum TheatreStatus { ACTIVE, INACTIVE }
+enum BookingStatus { PENDING_PAYMENT, CONFIRMED, CANCELLED, FAILED, EXPIRED }
+enum PaymentStatus { INITIATED, SUCCEEDED, FAILED, REFUNDED, PARTIAL_REFUNDED }
+enum SeatLockStatus { HELD, EXPIRED }
+
+// ==== Entities ====
+entity Partner {
+  name String required,
+  status PartnerStatus required,
+  createdAt Instant required,
+  updatedAt Instant required
+}
+
+entity AppUser {
+  email String required unique,
+  phone String required unique,
+  createdAt Instant required
+}
+
+entity Theatre {
+  name String required,
+  city String required,
+  address String,
+  status TheatreStatus required,
+  createdAt Instant required
+}
+
+entity Screen {
+  name String required,
+  // store as JSON in DB; JDL uses String here
+  seatLayout String required,
+  seatCount Integer,
+  createdAt Instant required
+}
+
+entity Performance {
+  startAt Instant required,
+  endAt Instant,
+  createdAt Instant required
+}
+
+entity SeatLock {
+  seatLabel String required,
+  holdFrom Instant required,
+  holdUntil Instant required,
+  status SeatLockStatus required,
+  createdAt Instant required,
+  updatedAt Instant required
+}
+
+entity Booking {
+  subtotal Integer required,
+  discountCode String,
+  discount Integer required,
+  taxesFees Integer required,
+  total Integer required,
+  status BookingStatus required,
+  createdAt Instant required,
+  updatedAt Instant required
+}
+
+entity BookedSeat {
+  seatLabel String required,
+  createdAt Instant required
+}
+
+entity Payment {
+  transactionId String required,
+  provider String required,
+  amount Integer required,
+  status PaymentStatus required,
+  createdAt Instant required,
+  updatedAt Instant required
+}
+
+// ==== Relationships ====
+relationship ManyToOne {
+  Theatre{partner(name)} to Partner,
+  Screen{theatre(name)} to Theatre,
+  Performance{screen(name)} to Screen,
+  SeatLock{show(id)} to Performance,
+  Booking{show(id)} to Performance,
+  Booking{user(email)} to AppUser,
+  BookedSeat{booking(id)} to Booking,
+  Payment{partner(name)} to Partner,
+  Payment{booking(id)} to Booking
+}
+
+// ==== Global options ====
+paginate * with no

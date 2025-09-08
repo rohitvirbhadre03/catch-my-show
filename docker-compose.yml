@@ -1,0 +1,59 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis/redis-stack:latest
+    container_name: cms-redis
+    ports: ["6379:6379","8001:8001"]
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: cms-db
+    environment:
+      MYSQL_DATABASE: catchmyshow
+      MYSQL_USER: cms
+      MYSQL_PASSWORD: cms
+      MYSQL_ROOT_PASSWORD: rootpass
+      TZ: Asia/Kolkata
+    ports:
+      - "3306:3306"
+    command:
+      [
+        "mysqld",
+        "--character-set-server=utf8mb4",
+        "--collation-server=utf8mb4_0900_ai_ci",
+        "--explicit_defaults_for_timestamp=ON",
+        "--default_authentication_plugin=caching_sha2_password"
+      ]
+    volumes:
+      - cms_mysql:/var/lib/mysql
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -ucms -pcms || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: cms-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    volumes:
+      - cms_rabbitmq:/var/lib/rabbitmq
+
+volumes:
+  cms_mysql:
+  cms_rabbitmq:
