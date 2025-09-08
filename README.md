@@ -11,7 +11,17 @@
 
 **Quick Start (Local)**
 
-Infra with Docker
+**Install Ollama**
+
+Download & install for macOS / Windows / Linux from the official site. Once installed, Ollama runs a local service listening on port 11434.
+
+bash
+```
+ollama serve
+ollama pull nomic-embed-text
+```
+
+**Infra with Docker**
 
 ```bash
 docker-compose up -d
